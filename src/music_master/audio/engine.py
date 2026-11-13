@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 
+from music_master.instruments.acoustic_synth import AcousticSynthRegistry
 from music_master.instruments.indian.tabla import TablaSynthesizer
 from music_master.instruments.indian.tanpura import TanpuraDroneEngine
 from music_master.instruments.percussion.drum_synthesizer import DrumMachineEngine
@@ -86,6 +87,12 @@ class Voice:
             self.sustain_level = 1.0
             self.release_time = 0.05
             self.harmonics = [(0.5, 0.3), (1.0, 0.4), (2.0, 0.2), (4.0, 0.1)]
+        elif (preset := AcousticSynthRegistry.get_preset(instrument_id)) is not None:
+            self.attack_time = preset.attack_time
+            self.decay_time = preset.decay_time
+            self.sustain_level = preset.sustain_level
+            self.release_time = preset.release_time
+            self.harmonics = list(preset.harmonics)
         else:
             # Default analog synth
             self.attack_time = 0.02
