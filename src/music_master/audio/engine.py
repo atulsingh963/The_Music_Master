@@ -3,6 +3,11 @@ from typing import Dict, List
 
 import numpy as np
 
+from music_master.instruments.indian.tabla import TablaSynthesizer
+from music_master.instruments.indian.tanpura import TanpuraDroneEngine
+from music_master.theory.metronome import MetronomeEngine
+from music_master.theory.tuning import TuningEngine
+
 
 def midi_to_freq(midi_note: int) -> float:
     """Converts a MIDI note number (0-127) to frequency in Hz (A4 = 69 = 440Hz)."""
@@ -13,10 +18,15 @@ class Voice:
     """Represents a single active polyphonic note voice."""
 
     def __init__(
-        self, midi_note: int, velocity: float, sample_rate: int, instrument_id: str = "harmonium"
+        self,
+        midi_note: int,
+        velocity: float,
+        sample_rate: int,
+        instrument_id: str = "harmonium",
+        freq: float | None = None,
     ) -> None:
         self.midi_note = midi_note
-        self.freq = midi_to_freq(midi_note)
+        self.freq = freq if freq is not None else midi_to_freq(midi_note)
         self.velocity = max(0.0, min(1.0, velocity / 127.0 if velocity > 1 else velocity))
         self.sample_rate = sample_rate
         self.instrument_id = instrument_id
@@ -38,6 +48,20 @@ class Voice:
             self.sustain_level = 0.95
             self.release_time = 0.12
             self.harmonics = [(1.0, 0.5), (2.0, 0.35), (3.0, 0.15), (4.0, 0.05)]
+        elif instrument_id == "sitar":
+            # Sitar: fast plucked attack, metallic buzzing jawari resonance, slow decay
+            self.attack_time = 0.008
+            self.decay_time = 1.6
+            self.sustain_level = 0.10
+            self.release_time = 0.3
+            self.harmonics = [
+                (1.0, 0.45),
+                (2.0, 0.25),
+                (3.0, 0.18),
+                (4.0, 0.12),
+                (5.0, 0.08),
+                (6.0, 0.05),
+            ]
         elif instrument_id == "grand_piano":
             # Acoustic Piano: percussive attack, natural exponential decay
             self.attack_time = 0.005
@@ -144,11 +168,19 @@ class AudioEngine:
         self.current_instrument_id: str = "harmonium"
         self._is_running = False
 
+        # Integrated auxiliary engines: Tanpura Drone, Tabla Synthesizer, Metronome, Tuning
+        self.tanpura = TanpuraDroneEngine(sample_rate=self.sample_rate)
+        self.tabla = TablaSynthesizer(sample_rate=self.sample_rate)
+        self.metronome = MetronomeEngine(sample_rate=self.sample_rate)
+        self.tuning = TuningEngine()
+
     def start(self) -> None:
         self._is_running = True
 
     def stop(self) -> None:
         self.panic()
+        self.tanpura.stop()
+        self.metronome.stop()
         self._is_running = False
 
     def is_running(self) -> bool:
@@ -159,6 +191,22 @@ class AudioEngine:
 
     def note_on(self, midi_note: int, velocity: int = 100) -> None:
         """Trigger note_on for given MIDI note (0-127)."""
+        # If currently playing Tabla, route note keys to tabla bols
+        if self.current_instrument_id == "tabla":
+            bol_mapping = {
+                60: "dha",
+                62: "dhin",
+                64: "ge",
+                65: "ke",
+                67: "na",
+                69: "tin",
+                71: "ti",
+                72: "ra",
+                74: "tu",
+            }
+            bol_name = bol_mapping.get(midi_note, "dha")
+            self.tabla.trigger_bol(bol_name, velocity=velocity / 127.0)
+            return
         # If already playing, release existing voice cleanly into releasing queue
         if midi_note in self.active_voices:
             old_voice = self.active_voices.pop(midi_note)
@@ -172,11 +220,13 @@ class AudioEngine:
             oldest_voice.trigger_release()
             self.sustained_voices.append(oldest_voice)
 
+        tuned_freq = self.tuning.get_frequency(midi_note)
         voice = Voice(
             midi_note=midi_note,
             velocity=velocity,
             sample_rate=self.sample_rate,
             instrument_id=self.current_instrument_id,
+            freq=tuned_freq,
         )
         self.active_voices[midi_note] = voice
 
@@ -201,6 +251,8 @@ class AudioEngine:
         """Stop all notes immediately."""
         self.active_voices.clear()
         self.sustained_voices.clear()
+        self.tanpura.stop()
+        self.metronome.stop()
 
     def render_block(self, num_frames: int) -> np.ndarray:
         """Renders an audio frame block of stereo float32 samples [-1.0, 1.0]."""
@@ -222,6 +274,11 @@ class AudioEngine:
             if not voice.is_dead:
                 surviving_sustained.append(voice)
         self.sustained_voices = surviving_sustained
+
+        # Mix in auxiliary sound generators (Tanpura drone, Tabla, Metronome)
+        output += self.tanpura.render_block(num_frames)
+        output += self.tabla.render_block(num_frames)
+        output += self.metronome.process_frames(num_frames)
 
         # Apply master volume
         output *= self.master_volume

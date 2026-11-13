@@ -19,7 +19,21 @@ def test_instrument_registry_initialization():
     assert piano.category == InstrumentCategory.WESTERN_KEYBOARD
     assert piano.availability == AvailabilityState.AVAILABLE
 
-    # Verify Planned instruments
+    # Verify Indian instruments (Harmonium, Sitar, Tabla, Tanpura)
     sitar = registry.get_by_id("sitar")
     assert sitar is not None
-    assert sitar.availability == AvailabilityState.PLANNED
+    assert sitar.category == InstrumentCategory.INDIAN_CLASSICAL
+    assert sitar.availability == AvailabilityState.AVAILABLE
+
+    tabla = registry.get_by_id("tabla")
+    assert tabla is not None
+    assert tabla.availability == AvailabilityState.AVAILABLE
+
+    tanpura = registry.get_by_id("tanpura")
+    assert tanpura is not None
+    assert tanpura.availability == AvailabilityState.AVAILABLE
+
+    # Verify Planned instruments (e.g. Bansuri, Veena)
+    bansuri = registry.get_by_id("bansuri")
+    assert bansuri is not None
+    assert bansuri.availability == AvailabilityState.PLANNED

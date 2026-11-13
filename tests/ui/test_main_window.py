@@ -62,3 +62,20 @@ def test_main_window_navigation_switch(qtbot):
     assert window.pages_stack.currentIndex() == 2
     assert audio_engine.current_instrument_id == "grand_piano"
     assert keyboard_controller.active_profile_name == "grand_piano"
+
+    # Indian Studio button is index 3
+    btn_indian = window.nav_group.button(3)
+    assert btn_indian is not None
+    qtbot.mouseClick(btn_indian, Qt.MouseButton.LeftButton)
+
+    assert window.pages_stack.currentIndex() == 3
+    assert keyboard_controller.active_profile_name == "harmonium"
+    assert hasattr(window, "indian_page")
+
+    # Music Theory button is index 6
+    btn_theory = window.nav_group.button(6)
+    assert btn_theory is not None
+    qtbot.mouseClick(btn_theory, Qt.MouseButton.LeftButton)
+
+    assert window.pages_stack.currentIndex() == 6
+    assert hasattr(window, "theory_page")

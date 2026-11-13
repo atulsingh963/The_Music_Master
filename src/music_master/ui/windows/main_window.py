@@ -22,7 +22,9 @@ from music_master.input.keyboard import KeyboardController
 from music_master.instruments.registry import InstrumentRegistry
 from music_master.ui.pages.dashboard_page import DashboardPage
 from music_master.ui.pages.harmonium_page import HarmoniumPage
+from music_master.ui.pages.indian_instruments_page import IndianInstrumentsPage
 from music_master.ui.pages.instrument_library_page import InstrumentLibraryPage
+from music_master.ui.pages.music_theory_page import MusicTheoryPage
 from music_master.ui.pages.piano_page import PianoPage
 from music_master.ui.pages.placeholder_page import PlaceholderPage
 
@@ -90,6 +92,7 @@ class MainWindow(QMainWindow):
             ("Dashboard", self._create_dashboard_page),
             ("Harmonium", self._create_harmonium_page),
             ("Piano", self._create_piano_page),
+            ("Indian Studio", self._create_indian_studio_page),
             ("Instrument Library", self._create_library_page),
             (
                 "Drum Machine",
@@ -107,14 +110,7 @@ class MainWindow(QMainWindow):
                     "Phase 4/7",
                 ),
             ),
-            (
-                "Music Theory",
-                lambda: PlaceholderPage(
-                    "Music Theory Hub",
-                    "Indian ragas, Western scales, chords, and microtonal tuning.",
-                    "Phase 10",
-                ),
-            ),
+            ("Music Theory", self._create_music_theory_page),
             (
                 "Mixer",
                 lambda: PlaceholderPage(
@@ -223,12 +219,20 @@ class MainWindow(QMainWindow):
         self.harmonium_page = HarmoniumPage(self.keyboard_controller, self)
         return self.harmonium_page
 
+    def _create_indian_studio_page(self) -> QWidget:
+        self.indian_page = IndianInstrumentsPage(self.audio_engine, self.keyboard_controller, self)
+        return self.indian_page
+
     def _create_piano_page(self) -> QWidget:
         self.piano_page = PianoPage(self.keyboard_controller, self)
         return self.piano_page
 
     def _create_library_page(self) -> QWidget:
         return InstrumentLibraryPage(self.instrument_registry, self)
+
+    def _create_music_theory_page(self) -> QWidget:
+        self.theory_page = MusicTheoryPage(self.audio_engine, self.keyboard_controller, self)
+        return self.theory_page
 
     def _connect_signals(self) -> None:
         self.keyboard_controller.note_on_signal.connect(self._on_note_on)
@@ -263,6 +267,14 @@ class MainWindow(QMainWindow):
         elif mode_text == "Piano":
             self.audio_engine.set_instrument("grand_piano")
             self.keyboard_controller.set_profile("grand_piano")
+        elif mode_text == "Indian Studio":
+            # Retain currently chosen Indian lead instrument (Harmonium or Sitar)
+            if hasattr(self, "indian_page"):
+                chosen_inst = self.indian_page.inst_combo.currentData() or "harmonium"
+                self.audio_engine.set_instrument(chosen_inst)
+            else:
+                self.audio_engine.set_instrument("harmonium")
+            self.keyboard_controller.set_profile("harmonium")
 
     def _on_note_on(self, note: int, velocity: int) -> None:
         self.audio_engine.note_on(note, velocity)
@@ -271,6 +283,10 @@ class MainWindow(QMainWindow):
             self.harmonium_page.virtual_keyboard.set_note_active(note, True)
         if hasattr(self, "piano_page"):
             self.piano_page.virtual_keyboard.set_note_active(note, True)
+        if hasattr(self, "indian_page"):
+            self.indian_page.virtual_keyboard.set_note_active(note, True)
+        if hasattr(self, "theory_page"):
+            self.theory_page.virtual_keyboard.set_note_active(note, True)
 
     def _on_note_off(self, note: int) -> None:
         self.audio_engine.note_off(note)
@@ -279,6 +295,10 @@ class MainWindow(QMainWindow):
             self.harmonium_page.virtual_keyboard.set_note_active(note, False)
         if hasattr(self, "piano_page"):
             self.piano_page.virtual_keyboard.set_note_active(note, False)
+        if hasattr(self, "indian_page"):
+            self.indian_page.virtual_keyboard.set_note_active(note, False)
+        if hasattr(self, "theory_page"):
+            self.theory_page.virtual_keyboard.set_note_active(note, False)
 
     def _on_panic(self) -> None:
         self.audio_engine.panic()
@@ -287,6 +307,10 @@ class MainWindow(QMainWindow):
             self.harmonium_page.virtual_keyboard.clear_active_notes()
         if hasattr(self, "piano_page"):
             self.piano_page.virtual_keyboard.clear_active_notes()
+        if hasattr(self, "indian_page"):
+            self.indian_page.virtual_keyboard.clear_active_notes()
+        if hasattr(self, "theory_page"):
+            self.theory_page.virtual_keyboard.clear_active_notes()
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key() == Qt.Key.Key_Escape:

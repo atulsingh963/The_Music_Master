@@ -26,6 +26,7 @@ class KeyboardController(QObject):
         super().__init__(parent)
         self.profiles: Dict[str, KeyboardProfile] = {
             "harmonium": get_harmonium_default_profile(),
+            "sitar": get_harmonium_default_profile(),  # Sitar uses the same authentic Sargam mapping layout
             "grand_piano": get_piano_default_profile(),
             "piano": get_piano_default_profile(),
         }
