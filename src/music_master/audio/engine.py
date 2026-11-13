@@ -159,15 +159,18 @@ class AudioEngine:
 
     def note_on(self, midi_note: int, velocity: int = 100) -> None:
         """Trigger note_on for given MIDI note (0-127)."""
-        # If already playing, release existing voice cleanly
+        # If already playing, release existing voice cleanly into releasing queue
         if midi_note in self.active_voices:
-            self.active_voices[midi_note].trigger_release()
+            old_voice = self.active_voices.pop(midi_note)
+            old_voice.trigger_release()
+            self.sustained_voices.append(old_voice)
 
         # Enforce polyphony limit
         if len(self.active_voices) >= self.polyphony:
             oldest_note = next(iter(self.active_voices))
-            self.active_voices[oldest_note].trigger_release()
-            del self.active_voices[oldest_note]
+            oldest_voice = self.active_voices.pop(oldest_note)
+            oldest_voice.trigger_release()
+            self.sustained_voices.append(oldest_voice)
 
         voice = Voice(
             midi_note=midi_note,

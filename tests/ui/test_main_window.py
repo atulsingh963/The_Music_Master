@@ -1,10 +1,12 @@
 from PySide6.QtCore import Qt
-from music_master.config import Config
-from music_master.audio.engine import AudioEngine
+
 from music_master.audio.audio_stream import AudioStream
+from music_master.audio.engine import AudioEngine
+from music_master.config import Config
 from music_master.input.keyboard import KeyboardController
 from music_master.instruments.registry import InstrumentRegistry
 from music_master.ui.windows.main_window import MainWindow
+
 
 def test_main_window_creation(qtbot):
     config = Config()
@@ -18,13 +20,14 @@ def test_main_window_creation(qtbot):
         audio_engine=audio_engine,
         audio_stream=audio_stream,
         keyboard_controller=keyboard_controller,
-        instrument_registry=registry
+        instrument_registry=registry,
     )
     qtbot.addWidget(window)
-    
+
     assert window.windowTitle().startswith("Music Master")
     assert window.pages_stack.count() >= 10
     assert window.pages_stack.currentIndex() == 0
+
 
 def test_main_window_navigation_switch(qtbot):
     config = Config()
@@ -38,7 +41,7 @@ def test_main_window_navigation_switch(qtbot):
         audio_engine=audio_engine,
         audio_stream=audio_stream,
         keyboard_controller=keyboard_controller,
-        instrument_registry=registry
+        instrument_registry=registry,
     )
     qtbot.addWidget(window)
 
