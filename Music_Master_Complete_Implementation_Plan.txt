@@ -1,0 +1,1116 @@
+MUSIC MASTER
+COMPLETE PROJECT IMPLEMENTATION SPECIFICATION
+=============================================
+
+Product tagline:
+Your Keyboard. Your Instruments. Your Music.
+
+Document purpose:
+This file is the single consolidated project brief for planning, implementing,
+testing, documenting, version-controlling, packaging, and releasing Music Master.
+
+IMPORTANT PROJECT PRINCIPLE
+---------------------------
+Build a real, reliable Python desktop music studio. Do not substitute fake
+sounds, placeholder buttons, mock implementations, or inaccurate feature claims
+for working functionality. Implement in tested milestones. The complete
+instrument catalogue is the long-term scope; instrument availability depends
+on properly licensed sound libraries or working synthesis implementations.
+
+================================================================
+1. PRODUCT VISION
+================================================================
+
+Music Master is a standalone desktop virtual musical instrument studio.
+It transforms a laptop or desktop keyboard into a configurable musical
+controller and provides instrument playback, music theory tools, MIDI support,
+recording, mixing, effects, and project management.
+
+Primary platform:
+- Windows 10/11
+
+Future platform goals:
+- Linux
+- macOS
+
+Application implementation:
+- Python for application logic, GUI, audio orchestration, input handling,
+  persistence, music theory, recording workflows, and supporting services.
+- Native dependencies used by audio libraries are allowed. A Python
+  application can depend on native C/C++ audio libraries for performance.
+
+Core objectives:
+- Play instruments using laptop keyboard keys.
+- Provide realistic instrument sounds.
+- Support multiple simultaneous notes and instruments.
+- Allow customizable keyboard mappings.
+- Support multiple octaves, sustain, velocity, and transposition.
+- Provide Indian and Western music theory features.
+- Record and play back MIDI and audio.
+- Support external MIDI controllers.
+- Provide a mixer and audio effects.
+- Detect optional motion sensors where hardware and OS support them.
+- Work offline for core functionality.
+- Save user settings and music projects locally.
+
+Non-goals for the first milestone:
+- Cloud accounts or mandatory online services.
+- Social network features.
+- AI music generation.
+- A fake implementation of unavailable instruments.
+- Loading every large sound library into memory at startup.
+
+================================================================
+2. PRODUCT DESIGN AND USER EXPERIENCE
+================================================================
+
+Design direction:
+- Premium, modern desktop music-production aesthetic.
+- Dark theme by default; optional light theme.
+- Clear typography and consistent spacing.
+- Reusable buttons, panels, cards, sliders, dialogs, and instrument controls.
+- Keyboard-first operation.
+- Responsive window layouts.
+- Clear device, recording, playback, and instrument status indicators.
+- Useful empty, loading, unavailable, and error states.
+- Accessible labels and sensible keyboard navigation.
+
+Main application shell:
+- Sidebar navigation.
+- Top toolbar.
+- Main content workspace.
+- Optional transport bar at the bottom.
+- Status bar for audio device, sample rate, buffer size, and engine state.
+
+Main pages:
+1. Dashboard
+2. Instrument Library
+3. Virtual Studio
+4. Harmonium
+5. Piano
+6. Drum Machine
+7. Keyboard Mapper
+8. Music Theory
+9. Mixer
+10. Recorder
+11. Piano Roll
+12. MIDI Studio
+13. Sound Library Manager
+14. Sensor Studio
+15. Settings
+
+Every visible control must perform its advertised action. Do not leave inert
+buttons in a feature represented as complete.
+
+================================================================
+3. COMPLETE PLANNED INSTRUMENT CATALOGUE
+================================================================
+
+Create an extensible instrument registry. Instrument metadata and sound
+availability must be separate from the audio engine.
+
+A. INDIAN CLASSICAL INSTRUMENTS
+- Harmonium
+- Tabla
+- Sitar
+- Tanpura
+- Bansuri
+- Veena
+- Dholak
+- Mridangam
+- Sarangi
+- Shehnai
+- Santoor
+- Manjira
+- Ghatam
+
+B. WESTERN KEYBOARD INSTRUMENTS
+- Grand Piano
+- Upright Piano
+- Electric Piano
+- Organ
+- Celesta
+- Harpsichord
+
+C. STRING INSTRUMENTS
+- Acoustic Guitar
+- Electric Guitar
+- Classical Guitar
+- Bass Guitar
+- Ukulele
+- Violin
+- Viola
+- Cello
+- Double Bass
+- Harp
+- Banjo
+- Mandolin
+
+D. WIND INSTRUMENTS
+- Concert Flute
+- Piccolo
+- Clarinet
+- Oboe
+- Bassoon
+- Alto Saxophone
+- Tenor Saxophone
+- Soprano Saxophone
+- Trumpet
+- Trombone
+- French Horn
+- Tuba
+- Recorder
+
+E. PERCUSSION INSTRUMENTS
+- Acoustic Drum Kit
+- Electronic Drum Kit
+- Kick Drum
+- Snare
+- Hi-Hat
+- Crash Cymbal
+- Ride Cymbal
+- Toms
+- Conga
+- Bongos
+- Cajon
+- Xylophone
+- Marimba
+- Vibraphone
+- Glockenspiel
+- Tambourine
+- Triangle
+
+F. ELECTRONIC INSTRUMENTS
+- Analog Synthesizer
+- Digital Synthesizer
+- FM Synthesizer
+- 808 Bass
+- 909 Drum Machine
+- Lead Synth
+- Pad Synth
+- Arpeggiator
+- Bass Synth
+- Chiptune Synth
+
+G. WORLD INSTRUMENTS
+- Chinese Erhu
+- Chinese Guzheng
+- Japanese Koto
+- Japanese Shakuhachi
+- Arabic Oud
+- Arabic Ney
+- African Djembe
+- Steelpan
+- Bagpipes
+- Accordion
+
+H. VOCAL AND AMBIENT INSTRUMENTS
+- Choir
+- Male Vocal
+- Female Vocal
+- Vocal Pad
+- Human Beatbox
+- Ambient Soundscapes
+- Nature Sounds
+- Cinematic Effects
+
+Instrument availability states:
+- Available: a working sound source is installed and tested.
+- Installed: the relevant library is present, but may need validation.
+- Missing sound library: the instrument requires an asset not installed.
+- Experimental: a working implementation exists but is not yet considered stable.
+- Planned: not implemented yet.
+
+Never claim that an instrument is available merely because its name appears
+in the catalogue. Never fabricate audio. Use appropriately licensed SoundFonts,
+SFZ libraries, WAV samples, or synthesis. Track the source and license of
+external sound assets. Do not redistribute assets without permission.
+
+================================================================
+4. AUDIO ENGINE ARCHITECTURE
+================================================================
+
+Recommended technologies:
+- FluidSynth: SoundFont synthesis engine.
+- pyFluidSynth: Python interface to FluidSynth, subject to platform compatibility.
+- sounddevice: audio input/output streaming.
+- NumPy: numerical and audio buffer operations.
+- SciPy: digital signal processing.
+- Pedalboard: audio effects.
+- Mido: MIDI files and message handling.
+- python-rtmidi: external MIDI input/output.
+- FFmpeg or another suitable licensed encoder: optional MP3 export.
+
+Architecture flow:
+
+Keyboard / MIDI / UI events
+          |
+          v
+Input and event controller
+          |
+          v
+Note event and instrument routing
+          |
+          v
+FluidSynth / custom synthesizer / sampler
+          |
+          v
+Per-track mixer and effects
+          |
+          v
+Master output and audio device
+          |
+          v
+Speakers / headphones / audio interface
+
+Requirements:
+- Dedicated audio processing path.
+- Use a dedicated audio thread or backend callback.
+- Preallocate audio buffers where practical.
+- Avoid blocking file, database, network, and GUI operations in audio callbacks.
+- Never update Qt widgets directly from an audio callback.
+- Use thread-safe queues or Qt queued signals for UI notifications.
+- Support note_on and note_off.
+- Support polyphony and simultaneous instruments.
+- Provide panic/stop-all-notes.
+- Release all active notes when focus is lost, a mapping is changed, an
+  instrument is unloaded, or the application closes.
+- Handle missing or disconnected audio devices.
+- Support device selection.
+- Support 44.1 kHz and 48 kHz where supported.
+- Make buffer size configurable.
+- Make polyphony configurable.
+- Handle engine initialization and shutdown cleanly.
+- Do not load all sound libraries at startup.
+- Measure real latency on supported hardware; do not promise an unverified
+  latency figure.
+
+Initial audio buffer options to test:
+- 128 frames
+- 256 frames
+- 512 frames
+- 1024 frames
+
+Actual latency depends on device drivers, hardware, buffer size, and operating
+system. Provide a stable fallback buffer if a low-latency configuration fails.
+
+================================================================
+5. KEYBOARD CONTROLLER AND DEFAULT MAPPINGS
+================================================================
+
+The keyboard controller is a signature feature.
+
+General requirements:
+- Key press triggers note_on.
+- Key release triggers note_off.
+- Repeated OS key events must not create duplicate active notes.
+- Support simultaneous key presses.
+- Support sustain.
+- Support octave changes.
+- Support semitone transposition.
+- Support velocity configuration.
+- Support custom key mapping profiles.
+- Support instrument-specific mappings.
+- Show visual feedback for pressed keys.
+- Avoid intercepting typing in text fields.
+- Handle application focus loss safely.
+- Make shortcuts configurable.
+- Provide a panic/stop-all-notes command.
+
+Harmonium default concept:
+A = Sa
+S = Re
+D = Ga
+F = Ma
+G = Pa
+H = Dha
+J = Ni
+K = higher Sa
+
+Other alphabet keys can be assigned to additional notes, accidentals,
+octave extensions, or user-defined controls. The actual note mapping must
+be configurable for the selected tonic and scale. Do not assume one mapping
+fits every raga or tuning system.
+
+Piano default concept:
+- Number-row keys are the primary note bank.
+- Alphabet keys provide additional notes, black keys, or another key bank.
+- Support multiple octaves through configurable banks and octave switching.
+- Make the displayed piano keyboard correspond exactly to the active mapping.
+
+Suggested global shortcuts (all configurable):
+- Ctrl+1 through Ctrl+9: select instrument/preset slots.
+- Up/Down: octave change.
+- Left/Right: transpose.
+- Space: sustain pedal.
+- R: start/stop recording when not typing in a text field.
+- Esc: stop all notes.
+- Ctrl+S: save project.
+- Ctrl+Shift+S: save project as.
+
+Do not hardcode shortcuts in multiple modules. Use a centralized shortcut and
+mapping manager. Detect and resolve shortcut conflicts.
+
+================================================================
+6. INSTRUMENT-SPECIFIC CONTROL
+================================================================
+
+Build suitable input layouts for:
+- Harmonium: melodic note layout and octave controls.
+- Piano: white and black keys, chords, sustain, velocity.
+- Guitar: note layout, strum/chord controls where practical.
+- Bass: low-register note layout.
+- Flute: melodic notes and expression controls.
+- Tabla: individual bols and configurable rhythm pads.
+- Drum kit: individual drum pads and MIDI drum mapping.
+- Synthesizer: note keys plus modulation and parameter controls.
+- Percussion: individual sample pads and pattern controls.
+
+Do not claim that a laptop keyboard reproduces every physical technique of
+a real instrument. Clearly describe the supported playing model.
+
+================================================================
+7. INDIAN AND WESTERN MUSIC THEORY
+================================================================
+
+INDIAN CLASSICAL MUSIC:
+- Sargam
+- Saptak: Mandra, Madhya, Tara
+- Shuddha swaras
+- Vikrit swaras
+- Raga definitions
+- Thaat
+- Aroha
+- Avaroha
+- Pakad
+- Tala
+- Laya
+- Tonic selection
+- Custom scale definitions
+- Indian tuning configuration
+
+Initial raga presets:
+- Yaman
+- Bhairav
+- Bhairavi
+- Kafi
+- Bageshri
+- Malkauns
+- Durga
+- Khamaj
+
+Raga definitions must be data-driven and editable. Do not assume that a
+single simplistic scale definition captures every performance rule or
+regional/traditional interpretation.
+
+WESTERN MUSIC THEORY:
+- Major scales
+- Minor scales
+- Pentatonic scales
+- Chromatic scale
+- Chords
+- Chord inversions
+- Arpeggios
+- Circle of fifths
+- Key signatures
+- Time signatures
+- Tempo
+- Transposition
+- Metronome
+
+TUNING:
+- 12-tone equal temperament
+- A4 reference frequency
+- Custom reference tuning
+- Indian tonic adjustment
+- Custom tuning presets
+- Future microtonal tuning support
+
+Use music21 for suitable Western theory functionality and custom tested
+modules for Indian classical features.
+
+================================================================
+8. RECORDING, PLAYBACK, AND PRODUCTION
+================================================================
+
+Recording features:
+- MIDI recording
+- Audio recording
+- Playback
+- Pause and resume
+- Loop playback
+- Overdub
+- Track management
+- Tempo synchronization
+- Metronome count-in
+- Quantization
+- Project save/load
+- Recording export
+
+Supported export goals:
+- MIDI
+- WAV
+- FLAC
+- MP3
+
+MP3 export must use an appropriate encoder and respect licensing requirements.
+
+Piano roll features:
+- Note placement
+- Note deletion
+- Note movement
+- Note duration editing
+- Velocity editing
+- Quantization
+- Zoom
+- Horizontal scrolling
+- Track selection
+- Playback cursor
+
+Use a clear project format with versioned metadata. Keep audio assets and
+large recordings outside the SQLite database. Avoid destructive editing
+unless the user explicitly chooses it.
+
+================================================================
+9. MIXER AND AUDIO EFFECTS
+================================================================
+
+Mixer features:
+- Master volume
+- Per-instrument/track volume
+- Stereo pan
+- Mute
+- Solo
+- Reverb
+- Delay
+- Chorus
+- Equalizer
+- Compressor
+- Limiter
+
+Requirements:
+- Each track has independent settings.
+- Effects are configurable.
+- Disabled effects should not consume unnecessary processing.
+- Provide safe defaults and output clipping protection.
+- Show meaningful meters where practical.
+- Avoid sudden volume jumps when switching presets or instruments.
+- Test the mixer under multiple simultaneous instruments.
+
+================================================================
+10. MIDI SUPPORT
+================================================================
+
+Implement:
+- MIDI input device discovery
+- MIDI output device discovery
+- MIDI note events
+- MIDI controller events
+- Sustain pedal
+- MIDI file import
+- MIDI file export
+- External keyboard integration
+- Device connection status
+- Device disconnection handling
+- MIDI channel configuration where supported
+
+MIDI input must be routable to selected instruments. Prevent duplicate event
+handling when both laptop keyboard and external MIDI input are active.
+
+================================================================
+11. OPTIONAL MOTION SENSOR SUPPORT
+================================================================
+
+Sensor support is optional and must never be required to play instruments.
+
+Detect hardware and OS capabilities before enabling controls. Investigate
+supported Windows Sensor APIs and compatible Python bindings. On Linux,
+investigate available hardware sensor interfaces.
+
+Potential hardware:
+- Accelerometer
+- Gyroscope
+- Magnetometer
+- Orientation sensor
+- Hinge-angle sensor, only if exposed by the device
+
+Potential musical mappings:
+- Tilt left/right: pitch bend
+- Tilt forward/backward: filter or expression
+- Orientation: modulation
+- Hinge angle: expression or custom MIDI CC
+
+Do not assume every laptop has a gyroscope, accelerometer, or hinge-angle
+sensor. Provide a clear unavailable state and mouse/MIDI alternatives.
+Sensor controls must be calibratable, smooth, rate-limited, and configurable.
+
+================================================================
+12. DATABASE AND LOCAL STORAGE
+================================================================
+
+Use SQLite and SQLAlchemy for local metadata.
+
+Store:
+- User settings
+- Instrument preferences
+- Keyboard mappings
+- Sound library metadata
+- Presets
+- Recent projects
+- Project metadata
+- Recording metadata
+- Device preferences
+
+Requirements:
+- Safe schema migrations.
+- Database access outside audio callbacks.
+- Persistent configuration.
+- Robust handling of corrupt or missing settings.
+- Backups or recovery for important project metadata where practical.
+- Large sound libraries and audio files stored as external files, not BLOBs
+  in SQLite unless a specific justified need exists.
+
+Use Pydantic or equivalent validation for configuration data.
+
+================================================================
+13. RECOMMENDED PROJECT STRUCTURE
+================================================================
+
+Music-Master/
+|
+|-- main.py
+|-- pyproject.toml
+|-- requirements.txt
+|-- README.md
+|-- LICENSE
+|-- CHANGELOG.md
+|-- CONTRIBUTING.md
+|-- .gitignore
+|-- .env.example
+|
+|-- src/
+|   |-- music_master/
+|       |-- __init__.py
+|       |-- app.py
+|       |-- config.py
+|       |
+|       |-- ui/
+|       |   |-- windows/
+|       |   |-- pages/
+|       |   |-- widgets/
+|       |   |-- dialogs/
+|       |   |-- themes/
+|       |   |-- assets/
+|       |
+|       |-- core/
+|       |   |-- events.py
+|       |   |-- application_state.py
+|       |   |-- instrument_manager.py
+|       |   |-- preset_manager.py
+|       |   |-- plugin_registry.py
+|       |
+|       |-- audio/
+|       |   |-- engine.py
+|       |   |-- audio_stream.py
+|       |   |-- fluidsynth_engine.py
+|       |   |-- synth_engine.py
+|       |   |-- mixer.py
+|       |   |-- effects.py
+|       |   |-- device_manager.py
+|       |
+|       |-- instruments/
+|       |   |-- base.py
+|       |   |-- registry.py
+|       |   |-- indian/
+|       |   |-- keyboard/
+|       |   |-- strings/
+|       |   |-- wind/
+|       |   |-- percussion/
+|       |   |-- electronic/
+|       |   |-- world/
+|       |   |-- vocal/
+|       |
+|       |-- input/
+|       |   |-- keyboard.py
+|       |   |-- key_mapping.py
+|       |   |-- midi_input.py
+|       |   |-- sensor_input.py
+|       |
+|       |-- theory/
+|       |   |-- notes.py
+|       |   |-- scales.py
+|       |   |-- chords.py
+|       |   |-- ragas.py
+|       |   |-- talas.py
+|       |   |-- tuning.py
+|       |
+|       |-- studio/
+|       |   |-- recorder.py
+|       |   |-- playback.py
+|       |   |-- piano_roll.py
+|       |   |-- quantizer.py
+|       |   |-- project_manager.py
+|       |
+|       |-- midi/
+|       |   |-- manager.py
+|       |   |-- importer.py
+|       |   |-- exporter.py
+|       |
+|       |-- storage/
+|       |   |-- database.py
+|       |   |-- models.py
+|       |   |-- repositories.py
+|       |
+|       |-- utils/
+|           |-- logging.py
+|           |-- paths.py
+|
+|-- assets/
+|   |-- icons/
+|   |-- images/
+|   |-- default_presets/
+|
+|-- soundfonts/
+|   |-- .gitkeep
+|
+|-- tests/
+|   |-- unit/
+|   |-- integration/
+|   |-- ui/
+|
+|-- docs/
+|   |-- ARCHITECTURE.md
+|   |-- AUDIO_ENGINE.md
+|   |-- INSTRUMENTS.md
+|   |-- KEYBOARD_MAPPING.md
+|   |-- CONTRIBUTING.md
+|   |-- ROADMAP.md
+|
+|-- scripts/
+    |-- setup_dev.py
+    |-- check_audio.py
+    |-- build.py
+
+Adjust the structure when justified, but keep modules cohesive, avoid
+unnecessary complexity, and document architectural changes.
+
+================================================================
+14. TESTING AND CODE QUALITY
+================================================================
+
+Use:
+- pytest
+- pytest-qt
+- Ruff
+- mypy
+
+Required test areas:
+- Unit tests
+- Integration tests
+- GUI tests
+- Audio engine tests
+- Keyboard mapping tests
+- Note lifecycle tests
+- MIDI tests
+- Recording tests
+- Database tests
+- Error handling tests
+
+Provide mock audio backends so automated tests do not require physical
+audio hardware.
+
+Quality commands:
+    ruff check .
+    ruff format --check .
+    mypy src/
+    pytest -q
+
+Do not disable tests just to get a passing result. Fix the underlying issue.
+Do not use broad type-ignore comments as a shortcut. Document any justified
+exceptions.
+
+Manual checks should include:
+- Application startup
+- Audio device selection
+- Playing and releasing notes
+- Simultaneous notes
+- Instrument switching
+- Panic/stop-all-notes
+- Application focus loss
+- Audio device disconnection
+- Project save/load
+- Recording and export
+- Shutdown and resource cleanup
+
+================================================================
+15. GIT AND GITHUB RULES
+================================================================
+
+Branch strategy:
+- main: stable, release-ready code
+- develop: integration branch
+- feature/*: new functionality
+- fix/*: bug fixes
+- refactor/*: restructuring
+- docs/*: documentation
+- test/*: testing improvements
+- release/*: release preparation
+
+Example branches:
+    develop
+    feature/audio-engine
+    feature/harmonium
+    feature/keyboard-mapping
+    fix/audio-device-crash
+    docs/update-readme
+
+Conventional Commit format:
+    <type>(<scope>): <description>
+
+Allowed types:
+- feat
+- fix
+- refactor
+- perf
+- docs
+- test
+- style
+- build
+- ci
+- chore
+- revert
+
+Examples:
+    feat(audio): implement FluidSynth engine
+    feat(instruments): add harmonium support
+    feat(input): implement keyboard mapping
+    feat(theory): add raga presets
+    fix(audio): resolve stuck notes on key release
+    perf(audio): optimize audio buffer processing
+    test(input): add keyboard mapping tests
+    docs(readme): update installation instructions
+
+Mandatory rules:
+1. Commit every meaningful completed feature separately.
+2. Never create one giant commit containing the entire application.
+3. Never use vague messages such as update, changes, final, or working.
+4. Never commit broken or untested functionality.
+5. Never commit .venv, __pycache__, cache folders, temporary files, or build
+   artifacts.
+6. Never commit credentials, secrets, or personal settings.
+7. Never commit sound libraries without redistribution permission.
+8. Update tests alongside functionality.
+9. Update README when installation, features, supported instruments, or usage
+   changes.
+10. Update CHANGELOG for notable changes.
+11. Never force-push main or develop.
+12. Never push directly to main; use pull requests.
+13. Review git diff before committing.
+14. Never describe unfinished functionality as complete.
+15. Preserve existing working functionality during refactoring.
+
+Recommended workflow:
+    Implement feature
+       -> Write/update tests
+       -> Run quality checks
+       -> Update documentation
+       -> Review git diff
+       -> Commit
+       -> Push feature branch
+       -> Create pull request
+       -> Review and merge
+
+Before committing:
+    ruff check .
+    ruff format --check .
+    mypy src/
+    pytest -q
+
+Run relevant manual audio checks as well. Do not invent commit hashes, remote
+push success, or test results. If remote credentials are unavailable, complete
+local work and state that limitation.
+
+================================================================
+16. README AND DOCUMENTATION RULES
+================================================================
+
+Maintain these files:
+- README.md
+- CHANGELOG.md
+- CONTRIBUTING.md
+- LICENSE
+- docs/ARCHITECTURE.md
+- docs/AUDIO_ENGINE.md
+- docs/INSTRUMENTS.md
+- docs/KEYBOARD_MAPPING.md
+- docs/ROADMAP.md
+
+README.md sections:
+1. Project introduction
+2. Screenshots
+3. Features
+4. Instrument catalogue
+5. Technology stack
+6. System requirements
+7. Installation
+8. Development setup
+9. Running the application
+10. Keyboard controls
+11. Instrument configuration
+12. SoundFont installation
+13. MIDI support
+14. Recording and export
+15. Music theory
+16. Audio configuration
+17. Project structure
+18. Testing
+19. Git contribution guidelines
+20. Roadmap
+21. Known limitations
+22. Troubleshooting
+23. License
+24. Acknowledgements
+
+README update triggers:
+- New instrument: update instrument catalogue and availability.
+- New feature: update feature list and usage.
+- Changed keyboard mapping: update keyboard controls.
+- New dependency: update installation instructions.
+- Architecture change: update architecture documentation.
+- New audio format: update recording/export section.
+- Changed setup: update development instructions.
+- New release: update version and release notes.
+- Removed functionality: remove obsolete instructions.
+
+Documentation must describe actual implemented behavior. Distinguish implemented,
+experimental, planned, and unavailable functionality.
+
+================================================================
+17. DEVELOPMENT ROADMAP
+================================================================
+
+Implement in milestones. Keep the application runnable throughout.
+
+PHASE 1 — FOUNDATION
+- Inspect repository and Git state.
+- Initialize Python package.
+- Configure dependencies and tooling.
+- Create README and documentation skeleton.
+- Create .gitignore.
+- Configure logging and settings.
+- Add initial tests.
+Acceptance: project environment works and application entry point launches.
+
+PHASE 2 — GUI
+- Build PySide6 main window.
+- Implement sidebar and navigation.
+- Implement design system and themes.
+- Add dashboard and placeholder states only for genuinely future modules.
+Acceptance: stable, navigable application shell.
+
+PHASE 3 — AUDIO ENGINE
+- Integrate FluidSynth.
+- Implement audio output.
+- Implement SoundFont loading.
+- Implement note_on and note_off.
+- Add device selection and buffer settings.
+- Add engine error handling and cleanup.
+Acceptance: a verified test sound plays and stops correctly.
+
+PHASE 4 — KEYBOARD CONTROLLER
+- Implement key press/release handling.
+- Implement mapping profiles.
+- Add sustain, velocity, octave, and transposition.
+- Add simultaneous note handling.
+- Add panic/stop-all-notes.
+Acceptance: laptop keyboard can play and release multiple notes reliably.
+
+PHASE 5 — FIRST INSTRUMENTS
+- Implement Harmonium mode.
+- Implement Piano mode.
+- Add real, properly licensed sound sources.
+- Add visual keyboard feedback.
+Acceptance: both instruments are playable and tested.
+
+PHASE 6 — INDIAN INSTRUMENTS
+- Add Tabla, Sitar, Tanpura, Bansuri, Veena, Dholak, Mridangam, and remaining
+  planned Indian instruments as assets or synthesis become available.
+- Add raga and tala presets.
+Acceptance: each listed available instrument has a verified sound source.
+
+PHASE 7 — WESTERN INSTRUMENTS
+- Add keyboard, string, and wind instrument families.
+- Add appropriate instrument-specific controls.
+Acceptance: verified catalogue entries and playback.
+
+PHASE 8 — PERCUSSION AND ELECTRONIC INSTRUMENTS
+- Add drum kits, percussion pads, drum patterns, synthesizers, and electronic
+  sound presets.
+Acceptance: working percussion and electronic sound workflows.
+
+PHASE 9 — WORLD AND VOCAL INSTRUMENTS
+- Add licensed world instrument and vocal/ambient assets.
+Acceptance: accurate availability and playback status.
+
+PHASE 10 — MUSIC THEORY
+- Add scales, chords, raga definitions, tala, tuning, and metronome.
+Acceptance: theory features are tested and connected to note mapping.
+
+PHASE 11 — MIXER AND EFFECTS
+- Add track controls, master controls, effects, and meters.
+Acceptance: multiple tracks mix correctly without destabilizing playback.
+
+PHASE 12 — MIDI
+- Add device discovery, input/output routing, import, and export.
+Acceptance: tested external MIDI workflow.
+
+PHASE 13 — RECORDING AND PIANO ROLL
+- Add MIDI and audio recording, playback, quantization, project saving, and
+  piano roll editing.
+Acceptance: users can create, save, reopen, and export a musical project.
+
+PHASE 14 — SENSORS
+- Detect available sensors.
+- Add optional expression mappings and calibration.
+- Provide fallback controls.
+Acceptance: supported hardware works; unsupported hardware fails gracefully.
+
+PHASE 15 — OPTIMIZATION AND RELEASE
+- Profile CPU, memory, startup, and audio performance.
+- Fix defects and improve stability.
+- Build Windows package.
+- Test on a clean Windows environment.
+- Prepare release notes and documentation.
+Acceptance: reproducible, tested release build.
+
+================================================================
+18. VERSIONING AND RELEASES
+================================================================
+
+Use Semantic Versioning:
+MAJOR.MINOR.PATCH
+
+Suggested milestones:
+- 0.1.0: initial functional prototype with GUI, audio engine, Harmonium, Piano.
+- 0.2.0: Indian instrument expansion.
+- 0.3.0: Western instruments.
+- 0.4.0: music theory and MIDI foundations.
+- 0.5.0: mixer and recording.
+- 0.7.0: piano roll and advanced studio.
+- 0.9.0: sensor integration and optimization.
+- 1.0.0: stable initial release.
+
+Do not assign a release version until the corresponding functionality is
+implemented and tested.
+
+Release checklist:
+- Run all automated tests.
+- Run linting and type checks.
+- Verify application startup.
+- Verify audio playback and note release.
+- Verify project save/load.
+- Verify export formats claimed by the release.
+- Verify no unlicensed assets are bundled.
+- Verify clean installation.
+- Update README and CHANGELOG.
+- Build and test the installer/package.
+- Tag the release only after validation.
+
+================================================================
+19. IMPLEMENTATION RULES FOR THE CODING AGENT
+================================================================
+
+Before changing files:
+1. Inspect the existing repository.
+2. Identify the current Git branch and working tree state.
+3. Inspect existing source, dependencies, README, and documentation.
+4. Preserve useful existing implementation.
+5. Identify the next incomplete milestone.
+6. Provide a concise implementation plan.
+
+Then implement the actual work.
+
+Do not stop after producing a plan or directory tree.
+Do not ask unnecessary questions about minor engineering decisions.
+Choose sensible defaults and document them.
+Do not silently replace required features with fake implementations.
+If a dependency is unavailable, investigate a compatible alternative and
+document the trade-off.
+If a hardware feature is unsupported, detect that and provide a fallback.
+Keep the application runnable after each milestone.
+Do not overwrite user work or discard uncommitted changes.
+Do not claim that commands, tests, commits, or pushes succeeded unless they
+actually succeeded.
+
+After each milestone, report:
+- Features implemented
+- Files created or modified
+- Dependencies added
+- Tests executed
+- Actual test results
+- Git commits created
+- Known limitations
+- Next milestone
+
+================================================================
+20. FINAL ACCEPTANCE CRITERIA
+================================================================
+
+The complete product should ultimately provide:
+- Professional desktop GUI
+- Functional instrument catalogue and availability states
+- Real instrument sounds
+- Harmonium keyboard mode
+- Piano keyboard mode
+- Multiple simultaneous notes
+- Custom keyboard mapping
+- Multiple octaves
+- Sustain and velocity
+- Music theory tools
+- Indian raga and tala tools
+- Mixer and effects
+- External MIDI support
+- MIDI recording and export
+- Audio recording and export
+- Piano roll
+- Sound library management
+- Optional sensor integration
+- Persistent settings
+- Reliable resource cleanup
+- Automated tests
+- Accurate documentation
+- Organized Git history
+- Windows application packaging
+
+A feature is complete only when its implementation works, relevant tests pass,
+documentation is accurate, and known limitations are recorded.
+
+================================================================
+21. FIRST EXECUTION TASK
+================================================================
+
+Start now.
+
+1. Inspect the current repository without deleting or overwriting user work.
+2. Check Git status and current branch.
+3. If the repository is empty, initialize the project structure.
+4. Create pyproject.toml, requirements/dependency configuration, and .gitignore.
+5. Create the initial README.md and documentation skeleton.
+6. Set up logging, configuration, and the application entry point.
+7. Build the first PySide6 application window and navigation.
+8. Add tests for the initial foundation.
+9. Run the quality checks.
+10. Review all changes.
+11. Create small, meaningful Conventional Commits for completed work.
+12. Report the actual results and next milestone.
+
+Do not attempt to build every instrument in one code-generation operation.
+Follow the roadmap and keep every milestone functional and verifiable.
+
+FINAL DIRECTIVE:
+Build Music Master as a serious, extensible, professional Python desktop music
+studio. Prioritize audio correctness, low latency, realistic sounds, modular
+architecture, clean code, reliable testing, accurate documentation, disciplined
+Git history, and a polished user experience.
+
+Functional quality is more important than claiming rapid completion.
