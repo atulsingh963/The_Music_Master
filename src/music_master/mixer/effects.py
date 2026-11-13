@@ -81,7 +81,9 @@ class DelayEffect(AudioEffect):
         # Fast vectorized path when buffer block size is <= delay_samples
         if num_frames <= delay_samples:
             read_indices = (
-                np.arange(self.write_pos - delay_samples, self.write_pos - delay_samples + num_frames)
+                np.arange(
+                    self.write_pos - delay_samples, self.write_pos - delay_samples + num_frames
+                )
             ) % buf_len
             delayed = self.buffer[read_indices]
             # Ping-pong cross channels
@@ -361,4 +363,3 @@ class PeakLimiter(AudioEffect):
         self.envelope = env
         out = np.tanh(sig * gains[:, np.newaxis])
         return out.astype(np.float32)
-
