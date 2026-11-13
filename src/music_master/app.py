@@ -8,6 +8,7 @@ from music_master.audio.engine import AudioEngine
 from music_master.config import Config
 from music_master.input.keyboard import KeyboardController
 from music_master.instruments.registry import InstrumentRegistry
+from music_master.midi.manager import MidiManager
 from music_master.ui.themes.theme import DARK_THEME_QSS
 from music_master.ui.windows.main_window import MainWindow
 from music_master.utils.logging import setup_logging
@@ -35,6 +36,7 @@ def main() -> int:
     audio_stream = AudioStream(audio_engine)
     keyboard_controller = KeyboardController()
     instrument_registry = InstrumentRegistry()
+    midi_manager = MidiManager()
 
     window = MainWindow(
         config=config,
@@ -42,6 +44,7 @@ def main() -> int:
         audio_stream=audio_stream,
         keyboard_controller=keyboard_controller,
         instrument_registry=instrument_registry,
+        midi_manager=midi_manager,
     )
 
     if config.ui.start_maximized:

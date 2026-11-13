@@ -5,6 +5,9 @@ import numpy as np
 
 from music_master.instruments.indian.tabla import TablaSynthesizer
 from music_master.instruments.indian.tanpura import TanpuraDroneEngine
+from music_master.instruments.percussion.drum_synthesizer import DrumMachineEngine
+from music_master.instruments.percussion.sequencer import DrumSequencer
+from music_master.mixer.track import MixerEngine
 from music_master.theory.metronome import MetronomeEngine
 from music_master.theory.tuning import TuningEngine
 
@@ -168,11 +171,16 @@ class AudioEngine:
         self.current_instrument_id: str = "harmonium"
         self._is_running = False
 
-        # Integrated auxiliary engines: Tanpura Drone, Tabla Synthesizer, Metronome, Tuning
+        # Integrated auxiliary engines: Tanpura Drone, Tabla Synthesizer, Metronome, Tuning, Drums, Mixer
         self.tanpura = TanpuraDroneEngine(sample_rate=self.sample_rate)
         self.tabla = TablaSynthesizer(sample_rate=self.sample_rate)
         self.metronome = MetronomeEngine(sample_rate=self.sample_rate)
         self.tuning = TuningEngine()
+        self.drum_engine = DrumMachineEngine(sample_rate=self.sample_rate)
+        self.drum_sequencer = DrumSequencer(
+            drum_engine=self.drum_engine, bpm=120.0, sample_rate=self.sample_rate
+        )
+        self.mixer = MixerEngine(sample_rate=self.sample_rate)
 
     def start(self) -> None:
         self._is_running = True
@@ -181,6 +189,7 @@ class AudioEngine:
         self.panic()
         self.tanpura.stop()
         self.metronome.stop()
+        self.drum_sequencer.stop()
         self._is_running = False
 
     def is_running(self) -> bool:
@@ -253,15 +262,17 @@ class AudioEngine:
         self.sustained_voices.clear()
         self.tanpura.stop()
         self.metronome.stop()
+        self.drum_sequencer.stop()
+        self.drum_engine.stop_all()
 
     def render_block(self, num_frames: int) -> np.ndarray:
-        """Renders an audio frame block of stereo float32 samples [-1.0, 1.0]."""
-        output = np.zeros(num_frames, dtype=np.float32)
+        """Renders an audio frame block of stereo float32 samples [-1.0, 1.0] through the mixer."""
+        synth_out = np.zeros(num_frames, dtype=np.float32)
 
         # Render active notes
         dead_notes = []
         for note, voice in self.active_voices.items():
-            output += voice.render(num_frames)
+            synth_out += voice.render(num_frames)
             if voice.is_dead:
                 dead_notes.append(note)
         for note in dead_notes:
@@ -270,24 +281,34 @@ class AudioEngine:
         # Render sustained / releasing notes
         surviving_sustained = []
         for voice in self.sustained_voices:
-            output += voice.render(num_frames)
+            synth_out += voice.render(num_frames)
             if not voice.is_dead:
                 surviving_sustained.append(voice)
         self.sustained_voices = surviving_sustained
 
-        # Mix in auxiliary sound generators (Tanpura drone, Tabla, Metronome)
-        output += self.tanpura.render_block(num_frames)
-        output += self.tabla.render_block(num_frames)
-        output += self.metronome.process_frames(num_frames)
+        # Render individual sound generator tracks
+        tanpura_out = self.tanpura.render_block(num_frames)
+        tabla_out = self.tabla.render_block(num_frames)
+        metronome_out = self.metronome.process_frames(num_frames)
+        drums_out = self.drum_sequencer.process_frames(num_frames)
 
-        # Apply master volume
-        output *= self.master_volume
+        # Route through mixer engine
+        track_buffers = {
+            "synth": synth_out,
+            "drums": drums_out,
+            "tanpura": tanpura_out,
+            "tabla": tabla_out,
+            "metronome": metronome_out,
+        }
 
-        # Soft limiter / soft clipping protection
-        np.clip(output, -0.98, 0.98, out=output)
+        master_stereo = self.mixer.mix_tracks(track_buffers, num_frames)
 
-        # Expand to stereo if requested
+        # Master volume and engine volume scale
+        master_stereo *= self.master_volume
+
+        # Limiting protection
+        np.clip(master_stereo, -0.98, 0.98, out=master_stereo)
+
         if self.channels == 2:
-            stereo_out = np.column_stack((output, output))
-            return stereo_out
-        return output.reshape(-1, 1)
+            return master_stereo
+        return master_stereo[:, 0:1]

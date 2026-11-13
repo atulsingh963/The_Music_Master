@@ -20,10 +20,14 @@ from music_master.audio.engine import AudioEngine
 from music_master.config import Config
 from music_master.input.keyboard import KeyboardController
 from music_master.instruments.registry import InstrumentRegistry
+from music_master.midi.manager import MidiManager
 from music_master.ui.pages.dashboard_page import DashboardPage
+from music_master.ui.pages.drum_machine_page import DrumMachinePage
 from music_master.ui.pages.harmonium_page import HarmoniumPage
 from music_master.ui.pages.indian_instruments_page import IndianInstrumentsPage
 from music_master.ui.pages.instrument_library_page import InstrumentLibraryPage
+from music_master.ui.pages.midi_studio_page import MidiStudioPage
+from music_master.ui.pages.mixer_page import MixerPage
 from music_master.ui.pages.music_theory_page import MusicTheoryPage
 from music_master.ui.pages.piano_page import PianoPage
 from music_master.ui.pages.placeholder_page import PlaceholderPage
@@ -41,6 +45,7 @@ class MainWindow(QMainWindow):
         audio_stream: AudioStream,
         keyboard_controller: KeyboardController,
         instrument_registry: InstrumentRegistry,
+        midi_manager: MidiManager | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
@@ -49,6 +54,7 @@ class MainWindow(QMainWindow):
         self.audio_stream = audio_stream
         self.keyboard_controller = keyboard_controller
         self.instrument_registry = instrument_registry
+        self.midi_manager = midi_manager or MidiManager()
 
         self.setWindowTitle(f"{config.app_name} v{config.version} - Studio")
         self.resize(config.ui.window_width, config.ui.window_height)
@@ -94,14 +100,7 @@ class MainWindow(QMainWindow):
             ("Piano", self._create_piano_page),
             ("Indian Studio", self._create_indian_studio_page),
             ("Instrument Library", self._create_library_page),
-            (
-                "Drum Machine",
-                lambda: PlaceholderPage(
-                    "Drum Machine",
-                    "Acoustic and electronic rhythm kits with step sequencer.",
-                    "Phase 8",
-                ),
-            ),
+            ("Drum Machine", self._create_drum_machine_page),
             (
                 "Keyboard Mapper",
                 lambda: PlaceholderPage(
@@ -111,14 +110,7 @@ class MainWindow(QMainWindow):
                 ),
             ),
             ("Music Theory", self._create_music_theory_page),
-            (
-                "Mixer",
-                lambda: PlaceholderPage(
-                    "Studio Mixer",
-                    "Multi-track volume, pan, EQ, reverb, and compression.",
-                    "Phase 11",
-                ),
-            ),
+            ("Mixer", self._create_mixer_page),
             (
                 "Recorder",
                 lambda: PlaceholderPage(
@@ -127,14 +119,7 @@ class MainWindow(QMainWindow):
                     "Phase 13",
                 ),
             ),
-            (
-                "MIDI Studio",
-                lambda: PlaceholderPage(
-                    "MIDI Studio",
-                    "Hardware MIDI keyboard setup, routing, and channel mapping.",
-                    "Phase 12",
-                ),
-            ),
+            ("MIDI Studio", self._create_midi_studio_page),
             (
                 "Settings",
                 lambda: PlaceholderPage(
@@ -233,6 +218,18 @@ class MainWindow(QMainWindow):
     def _create_music_theory_page(self) -> QWidget:
         self.theory_page = MusicTheoryPage(self.audio_engine, self.keyboard_controller, self)
         return self.theory_page
+
+    def _create_drum_machine_page(self) -> QWidget:
+        self.drum_page = DrumMachinePage(self.audio_engine, self)
+        return self.drum_page
+
+    def _create_mixer_page(self) -> QWidget:
+        self.mixer_page = MixerPage(self.audio_engine, self)
+        return self.mixer_page
+
+    def _create_midi_studio_page(self) -> QWidget:
+        self.midi_page = MidiStudioPage(self.audio_engine, self.midi_manager, self)
+        return self.midi_page
 
     def _connect_signals(self) -> None:
         self.keyboard_controller.note_on_signal.connect(self._on_note_on)
