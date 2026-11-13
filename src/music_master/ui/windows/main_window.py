@@ -21,6 +21,7 @@ from music_master.config import Config
 from music_master.input.keyboard import KeyboardController
 from music_master.instruments.registry import InstrumentRegistry
 from music_master.midi.manager import MidiManager
+from music_master.sensors.engine import SensorEngine
 from music_master.studio.project import ProjectManager
 from music_master.studio.recorder import AudioMidiRecorder
 from music_master.ui.pages.dashboard_page import DashboardPage
@@ -34,6 +35,7 @@ from music_master.ui.pages.music_theory_page import MusicTheoryPage
 from music_master.ui.pages.piano_page import PianoPage
 from music_master.ui.pages.placeholder_page import PlaceholderPage
 from music_master.ui.pages.recorder_page import RecorderPianoRollPage
+from music_master.ui.pages.sensor_page import SensorStudioPage
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +62,7 @@ class MainWindow(QMainWindow):
         self.midi_manager = midi_manager or MidiManager()
         self.recorder = AudioMidiRecorder(sample_rate=self.audio_engine.sample_rate)
         self.project_manager = ProjectManager()
+        self.sensor_engine = SensorEngine()
         self.audio_engine.recorder = self.recorder
 
         self.setWindowTitle(f"{config.app_name} v{config.version} - Studio")
@@ -119,6 +122,7 @@ class MainWindow(QMainWindow):
             ("Mixer", self._create_mixer_page),
             ("Recorder & Piano Roll", self._create_recorder_page),
             ("MIDI Studio", self._create_midi_studio_page),
+            ("Sensor Studio", self._create_sensor_page),
             (
                 "Settings",
                 lambda: PlaceholderPage(
@@ -231,6 +235,10 @@ class MainWindow(QMainWindow):
             self.audio_engine, self.recorder, self.project_manager, self
         )
         return self.recorder_page
+
+    def _create_sensor_page(self) -> QWidget:
+        self.sensor_page = SensorStudioPage(self.audio_engine, self.sensor_engine, self)
+        return self.sensor_page
 
     def _create_midi_studio_page(self) -> QWidget:
         self.midi_page = MidiStudioPage(self.audio_engine, self.midi_manager, self)

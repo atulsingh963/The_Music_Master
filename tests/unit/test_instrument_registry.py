@@ -33,7 +33,12 @@ def test_instrument_registry_initialization():
     assert tanpura is not None
     assert tanpura.availability == AvailabilityState.AVAILABLE
 
-    # Verify Planned instruments (e.g. Bansuri, Veena)
+    # Verify synthesized instruments (e.g. Bansuri is now AVAILABLE)
     bansuri = registry.get_by_id("bansuri")
     assert bansuri is not None
-    assert bansuri.availability == AvailabilityState.PLANNED
+    assert bansuri.availability == AvailabilityState.AVAILABLE
+
+    # Verify Planned instruments (e.g. Veena)
+    veena = registry.get_by_id("veena")
+    assert veena is not None
+    assert veena.availability == AvailabilityState.PLANNED
