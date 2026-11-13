@@ -9,10 +9,7 @@ def test_sensor_engine_fallback_detection():
     engine = SensorEngine()
     assert len(engine.detected_sensors) > 0
     # On environments without hardware, fallback should be present
-    assert (
-        engine.is_hardware_available
-        or SensorType.KEYBOARD_FALLBACK in engine.detected_sensors
-    )
+    assert engine.is_hardware_available or SensorType.KEYBOARD_FALLBACK in engine.detected_sensors
 
 
 def test_sensor_engine_processing_and_calibration():

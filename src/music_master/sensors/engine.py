@@ -34,9 +34,9 @@ class SensorEngine:
         self.is_hardware_available = False
         self.detected_sensors: List[SensorType] = []
         self._active_mapping = {
-            "tilt_x": "pitch_bend",     # left/right tilt -> pitch bend
+            "tilt_x": "pitch_bend",  # left/right tilt -> pitch bend
             "tilt_y": "filter_cutoff",  # forward/back tilt -> filter / expression
-            "tilt_z": "modulation",     # rotation -> vibrato modulation
+            "tilt_z": "modulation",  # rotation -> vibrato modulation
         }
 
         # Expression values (-1.0 to 1.0 or 0.0 to 1.0)
@@ -100,7 +100,9 @@ class SensorEngine:
         self.modulation = abs(calibrated_z)
 
         reading = SensorReading(
-            sensor_type=SensorType.ACCELEROMETER if self.is_hardware_available else SensorType.KEYBOARD_FALLBACK,
+            sensor_type=SensorType.ACCELEROMETER
+            if self.is_hardware_available
+            else SensorType.KEYBOARD_FALLBACK,
             x=calibrated_x,
             y=calibrated_y,
             z=calibrated_z,

@@ -79,7 +79,9 @@ class AudioExporter:
             ]
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             if result.returncode != 0:
-                raise RuntimeError(f"FFmpeg failed with exit code {result.returncode}: {result.stderr}")
+                raise RuntimeError(
+                    f"FFmpeg failed with exit code {result.returncode}: {result.stderr}"
+                )
             logger.info(f"Exported MP3 file: {filepath} ({bitrate})")
         finally:
             if os.path.exists(tmp_wav_path):

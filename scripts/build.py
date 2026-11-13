@@ -36,7 +36,9 @@ def build_release() -> None:
         print(f"Build failed with exit code {result.returncode}")
         sys.exit(result.returncode)
 
-    print("\n[SUCCESS] Music Master packaged successfully to:", os.path.join(dist_dir, "MusicMaster"))
+    print(
+        "\n[SUCCESS] Music Master packaged successfully to:", os.path.join(dist_dir, "MusicMaster")
+    )
 
 
 if __name__ == "__main__":

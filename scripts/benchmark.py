@@ -40,8 +40,8 @@ def benchmark_audio_rendering():
     time_per_block = elapsed / num_blocks
     cpu_load_percent = (time_per_block / max_budget_seconds) * 100.0
 
-    print(f"\n[BENCHMARK] Time per {buffer_size}-frame block: {time_per_block*1000.0:.3f} ms")
-    print(f"[BENCHMARK] Buffer budget: {max_budget_seconds*1000.0:.3f} ms")
+    print(f"\n[BENCHMARK] Time per {buffer_size}-frame block: {time_per_block * 1000.0:.3f} ms")
+    print(f"[BENCHMARK] Buffer budget: {max_budget_seconds * 1000.0:.3f} ms")
     print(f"[BENCHMARK] Estimated Audio Thread CPU Load: {cpu_load_percent:.1f}%")
 
     # Audio rendering should easily run within real-time budget (< 50% CPU load on modern machines)

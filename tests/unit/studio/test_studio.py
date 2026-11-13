@@ -78,8 +78,10 @@ def test_recorder_timeline_and_notes():
 
 def test_quantizer():
     notes = [
-        NoteEvent(note=60, velocity=100, start_time=0.24, duration=0.24),  # Near 0.25 (1/16 at 120 bpm = 0.125s, so 0.25 is 1/8)
-        NoteEvent(note=62, velocity=100, start_time=0.49, duration=0.5),   # Near 0.50 (1/4 beat)
+        NoteEvent(
+            note=60, velocity=100, start_time=0.24, duration=0.24
+        ),  # Near 0.25 (1/16 at 120 bpm = 0.125s, so 0.25 is 1/8)
+        NoteEvent(note=62, velocity=100, start_time=0.49, duration=0.5),  # Near 0.50 (1/4 beat)
     ]
     quantized = NoteQuantizer.quantize_notes(notes, grid="1/4", bpm=120.0, strength=1.0)
     # At 120 bpm, quarter note is 0.5s.
