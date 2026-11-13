@@ -1,5 +1,5 @@
 import math
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import numpy as np
 
@@ -181,6 +181,7 @@ class AudioEngine:
             drum_engine=self.drum_engine, bpm=120.0, sample_rate=self.sample_rate
         )
         self.mixer = MixerEngine(sample_rate=self.sample_rate)
+        self.recorder: Any = None
 
     def start(self) -> None:
         self._is_running = True
@@ -308,6 +309,9 @@ class AudioEngine:
 
         # Limiting protection
         np.clip(master_stereo, -0.98, 0.98, out=master_stereo)
+
+        if hasattr(self, "recorder") and self.recorder is not None:
+            self.recorder.record_audio_block(master_stereo)
 
         if self.channels == 2:
             return master_stereo
